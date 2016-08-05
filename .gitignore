@@ -1,2 +1,9 @@
 # Dependency Directories
 node_modules
+
+# Configuration File
+## It is recommended that you do not commit the configuration file that may
+## contain sensitive information. A config.tpl.js file is provided that has
+## defaults. Change the name of config.tpl.js to config.js and add your desired
+## configuration information.
+config.js
