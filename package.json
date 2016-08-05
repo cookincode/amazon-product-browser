@@ -1,0 +1,10 @@
+{
+  "name": "amazon-product-browser",
+  "version": "0.0.1",
+  "description": "A Node.js JSON API that consumes and displays product data from the Amazon Product Advertising API.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stephen Cook",
+  "license": "MIT"
+}
