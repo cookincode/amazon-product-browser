@@ -20,12 +20,27 @@ let client = new AWSClient(config.aws.accessKey,
 let params = {};
 params.SearchIndex = 'Books';
 params.Keywords = 'NodeJS';
-params.ResponseGroup = 'Images,Reviews';
+params.ResponseGroup = 'Small,Images,ItemAttributes';
 params.Sort = 'price';
 
-client.search(params).then((response) => {
+client.search(params).then((result) => {
   console.log('-----');
-  console.log(response);
+  // console.log(result);
+  // console.log(result[0]);
+
+  let items = result.map((r) => {
+    return {
+      title: r.ItemAttributes.Title,
+      author: r.ItemAttributes.Author,
+      publisher: r.ItemAttributes.Publisher,
+      published: r.ItemAttributes.PublicationDate,
+      format: r.ItemAttributes.Format,
+      pages: r.ItemAttributes.NumberOfPages,
+      coverUrl: r.MediumImage.URL
+    };
+  });
+
+  console.log(items);
 }).catch((err) => {
   console.error(err);
 });
