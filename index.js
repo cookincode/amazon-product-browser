@@ -2,7 +2,7 @@ const config = require('./config.js');
 const express = require('express');
 
 const AWSClient = require('./lib/aws-client').AWSClient;
-const MongoClient = require('mongodb').MongoClient;
+const MongoCache = require('./lib/mongo-cache-control').MongoCache;
 
 if(config.aws.accessKey.startsWith('[')) {
   throw new Error('Missing AWS Access Key. Please check config.js.');
@@ -14,67 +14,10 @@ if(config.aws.associateTag.startsWith('[')) {
   throw new Error('Missing Associate Tag. Please check config.js.');
 }
 
-let mongoUrl = config.db.url;
-let cacheTimeout = config.cache.timeout;
 
-function insertRecord(call, result) {
-
-  MongoClient.connect(mongoUrl, (err, db) => {
-    if(err) { return console.dir(err) }
-
-    let collection = db.collection('aws');
-    let doc = {
-      call: call,
-      date: new Date(),
-      result: result};
-
-    collection.insert(doc);
-
-    db.close();
-  });
-
-}
-
-function checkCache(call) {
-
-  return new Promise((resolve, reject) => {
-    var request = MongoClient.connect(mongoUrl, (err, db) => {
-      if(err) { return console.dir(err) }
-
-      let collection = db.collection('aws');
-      collection.findOne({call: call}, (err, doc) => {
-        if(err) {
-          console.dir(err);
-          reject(err);
-          db.close();
-          return;
-        }
-
-        if(doc == null) {
-          resolve(undefined)
-          db.close();
-          return;
-        }
-
-        if( ((new Date) - doc.date) < cacheTimeout ) {
-          console.log('Sending from cache');
-          resolve(doc.result)
-          db.close();
-          return;
-        }
-
-        console.log('Cache out of date, refresh!');
-        collection.deleteMany({call: call}, (err, results) => {
-          if(err) { console.dir(err); }
-          db.close();
-        });
-        resolve(undefined);
-      });
-    })
-  });
-
-}
-
+let cache = new MongoCache({
+  url: config.db.url,
+  timeout: config.cache.timeout});
 
 /*** AWS Client ***/
 let client = new AWSClient(config.aws.accessKey,
@@ -106,11 +49,14 @@ router.route('/:title')
 .get(function(req, res, next) {
   let call = req.originalUrl;
 
-  checkCache(call).then((cache) => {
-    if(cache) {
-      res.json({from:'Cache', items:cache});
+  console.log('Checking cache for ' + call);
+  cache.retrieve(call).then((result) => {
+    if(result) {
+      console.log('Retrieved From Cache');
+      res.json({from:'Cache', items:result});
     } else {
 
+      console.log('Running Amazon Search');
       // // Set parameters
       let params = {};
       params.SearchIndex = 'Books';
@@ -135,7 +81,7 @@ router.route('/:title')
           };
         });
 
-        insertRecord(call, items);
+        cache.store(call, items);
 
         // console.log(items);
         res.json({from:'Search', items:items});
