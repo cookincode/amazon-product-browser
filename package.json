@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.14.0",
+    "mongodb": "^2.2.5",
     "xml2js": "^0.4.17"
   }
 }

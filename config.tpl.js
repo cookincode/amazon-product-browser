@@ -6,4 +6,10 @@ config.aws.accessKey = "[AWS ID HERE]";
 config.aws.secretKey = "[AWS SECRET HERE]";
 config.aws.associateTag = "[ASSOCIATE TAG HERE]";
 
+config.db = {};
+config.db.url = 'mongodb://localhost:27017/aznprodDb';
+
+config.cache = {};
+config.cache.timeout = 10000;
+
 module.exports = config;
