@@ -14,10 +14,12 @@ if(config.aws.associateTag.startsWith('[')) {
   throw new Error('Missing Associate Tag. Please check config.js.');
 }
 
+/** Setup MongoCache **/
 let cache = MongoCache.init({
   url: config.db.url,
   timeout: config.cache.timeout});
 
+/** Setup AWS Client **/
 let client = AWSClient.init({
   accessKey: config.aws.accessKey,
   secretKey: config.aws.secretKey,
@@ -28,6 +30,7 @@ let server = express();
 
 server.use('/books', require('./routes/books'));
 
+/** Run Server **/
 server.listen(3000, function() {
   console.log('Amazon Product Browser listening on port 3000!');
 });

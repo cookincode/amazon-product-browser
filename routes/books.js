@@ -21,13 +21,14 @@ router.route('/:title')
       res.json({from:'Cache', items:result});
     } else {
 
-      // // Set parameters
+      // Set Search Parameters
       let params = {};
       params.SearchIndex = 'Books';
       params.Keywords = req.info.title;
       params.ResponseGroup = 'Small,Images,ItemAttributes';
 
       client.search(params).then((result) => {
+        // Grab only the fields that we care about
         let items = result.map((r) => {
           return {
             asin: r.ASIN,
@@ -41,13 +42,13 @@ router.route('/:title')
           };
         });
 
+        // Store result in the cache
         cache.store(call, items);
 
         res.json({from:'Search', items:items});
       }).catch((err) => {
         console.dir(err);
       });
-
     }
   });
 });
