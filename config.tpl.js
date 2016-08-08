@@ -10,6 +10,6 @@ config.db = {};
 config.db.url = 'mongodb://localhost:27017/aznprodDb';
 
 config.cache = {};
-config.cache.timeout = 10000;
+config.cache.timeout = 3600000;
 
 module.exports = config;
